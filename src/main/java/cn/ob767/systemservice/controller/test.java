@@ -1,9 +1,12 @@
 package cn.ob767.systemservice.controller;
 
+import cn.ob767.systemservice.interceptor.ResponseInterceptor;
 import cn.ob767.systemservice.mapper.UserMapper;
 import cn.ob767.systemservice.md5.MD5;
 import cn.ob767.systemservice.model.login.User;
 import cn.ob767.systemservice.utils.RedisUtils;
+import cn.ob767.systemservice.utils.enumerations.ResponseStatus;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +21,7 @@ public class test {
     private UserMapper userMapper;
 
     @PostMapping("/set")
-    public User set() {
+    public ResponseInterceptor<JSONObject> set() {
         User user = new User();
         user.setUserEmail("gaoxi@meicai.com");
         user.setUserName("gaoxi");
@@ -27,7 +30,10 @@ public class test {
         user.setCreateTime(System.currentTimeMillis() / 1000);
         user.setUpdateTime(System.currentTimeMillis() / 1000);
         redisUtils.redisSet("name", user, 10L);
-        return user;
+        ResponseInterceptor<JSONObject> responseInterceptor = new ResponseInterceptor<>(ResponseStatus.SUCCESS);
+        JSONObject userJson = JSONObject.parseObject(JSONObject.toJSONString(user));
+        responseInterceptor.setData(userJson);
+        return responseInterceptor;
     }
 
     @PostMapping("/get")
